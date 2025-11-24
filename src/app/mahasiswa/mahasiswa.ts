@@ -82,15 +82,15 @@ export class Mahasiswa implements AfterViewInit, OnDestroy {
   }
 
   postRecord(): void {
-    var alamat =$('#alamatText').val();
-    var jenisKelamin =$('#jenisKelaminSelect').val();
-    var jp =$('#jpSelect').val();
-    var nama =$('#namaText').val();
-    var nim =$('#nimText').val();
-    var statusNikah =$('#statusNikahSelect').val();
-    var tempatLahir =$('#tempatLahirText').val();
-    var tanggalLahir =$('#tanggalLahirText').val();
-    var tahunMasuk =$('#tahunMasukText').val();
+    var alamat = $('#alamatText').val();
+    var jenisKelamin = $('#jenisKelaminSelect').val();
+    var jp = $('#jpSelect').val();
+    var nama = $('#namaText').val();
+    var nim = $('#nimText').val();
+    var statusNikah = $('#statusNikahSelect').val();
+    var tempatLahir = $('#tempatLahirText').val();
+    var tanggalLahir = $('#tanggalLahirText').val();
+    var tahunMasuk = $('#tahunMasukText').val();
 
     if (nim.length == 0) {
       alert("NIM wajib diisi!");
@@ -132,20 +132,20 @@ export class Mahasiswa implements AfterViewInit, OnDestroy {
     tanggalLahir = encodeURIComponent(tanggalLahir);
 
     var url = 'https://stmikpontianak.cloud/011100862/tambahMahasiswa.php?' +
-      "?alamat=" + alamat +
-      "&jenisKelamin=" + jenisKelamin +
-      "&jp=" + jp +
-      "&nama=" + nama +
-      "&nim=" + nim +
-      "&tahunMasuk=" + tahunMasuk +
-      "&statusPernikahan=" + statusNikah +
-      "&tempatLahir=" + tempatLahir +
-      "&tanggalLahir=" + tanggalLahir;
+        "&alamat=" + alamat +
+        "&jenisKelamin=" + jenisKelamin +
+        "&jp=" + jp +
+        "&nama=" + nama +
+        "&nim=" + nim +
+        "&statusPernikahan=" + statusNikah +
+        "&tahunMasuk=" + tahunMasuk +
+        "&tanggalLahir=" + tanggalLahir +
+        "&tempatLahir=" + tempatLahir;
 
-      this.httpclient.get(url)
+    this.httpclient.get(url)
       .subscribe((data: any)=>{
-        console.table(data);
-        alert(data.status + ": " + data.message);
+        console.log(data);
+        alert(data.status + " --> " + data.message);
 
         this.bindMahasiswa();
         $('#tambahModal').modal('hide');
