@@ -18,7 +18,8 @@ export class Dashboard {
   ngOnInit(): void {
     this.renderer.addClass(this.document.body, 'dashboard-page');
 
-    this.renderer.removeClass(this.document.body, 'sidebar-mini');
+    this.renderer.removeClass(document.body, "sidebar-open");
+    this.renderer.addClass(document.body, "sidebar-closed");
     this.renderer.removeClass(this.document.body, 'layout-fixed');
     this.renderer.setAttribute(this.document.body, 'style', 'height: auto; min-height: 100%;');}
 
