@@ -48,12 +48,7 @@ export class Cuaca implements AfterViewInit {
   private map: L.Map | undefined;
   currentWeather: any;
   cityData: any;
-  todayDate: string = new Date().toLocaleDateString('en-US', { 
-    weekday: 'long', 
-    year: 'numeric', 
-    month: 'long', 
-    day: 'numeric' 
-  });
+  todayDate: string = '';
 
   // Constructor
   constructor(private renderer: Renderer2, private http: HttpClient) { 
@@ -80,27 +75,8 @@ export class Cuaca implements AfterViewInit {
     this.getData(cityName);
   }
 
-  getData(city: string): void {
-    city = encodeURIComponent(city);
-
-    this.http
-      .get(`http://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=2579d57cd8e6e22856470b726db06e00`)
-      .subscribe({
-        next: (data: any) => {
-          this.handleWeatherData(data);
-        },
-        error: (error: any) => {
-          alert(error.error.message);
-          this.table1.clear();
-          this.table1.draw(false);
-        }
-      });
-  }
-
   kelvinToCelsius(kelvin: number): number {
-    let celsius = kelvin - 273.15;
-    celsius = Math.round(celsius * 100) / 100;
-    return celsius;
+    return Math.round((kelvin - 273.15) * 100) / 100;
   }
 
   getWeatherIconUrl(icon: string): string {
@@ -113,20 +89,29 @@ export class Cuaca implements AfterViewInit {
   }
 
   calculateDewPoint(temp: number, humidity: number): number {
-    // Convert Kelvin to Celsius
     const tempC = this.kelvinToCelsius(temp);
-    
-    // Magnus formula for dew point calculation
     const a = 17.27;
     const b = 237.7;
-    
     const alpha = ((a * tempC) / (b + tempC)) + Math.log(humidity / 100);
     const dewPoint = (b * alpha) / (a - alpha);
-    
     return Math.round(dewPoint * 10) / 10;
   }
 
-  // Private Methods
+  private getData(city: string): void {
+    city = encodeURIComponent(city);
+
+    this.http
+      .get(`http://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=2579d57cd8e6e22856470b726db06e00`)
+      .subscribe({
+        next: (data: any) => this.handleWeatherData(data),
+        error: (error: any) => {
+          alert(error.error.message);
+          this.table1.clear();
+          this.table1.draw(false);
+        }
+      });
+  }
+
   private initializeDataTable(): void {
     this.table1 = $('#table1').DataTable({
       columnDefs: [
@@ -134,18 +119,15 @@ export class Cuaca implements AfterViewInit {
           targets: 0,
           render: (data: string) => {
             const waktu = moment(data + " UTC ");
-            return waktu.local().format("YYYY-MM-DD") + "<br/>" + 
-                   waktu.local().format("HH:mm") + " WIB";
+            return `${waktu.local().format("YYYY-MM-DD")}<br/>${waktu.local().format("HH:mm")} WIB`;
           },
         },
         {
-          targets: [1],
-          render: (data: string) => {
-            return `<img src='${data}' style='filter: drop-shadow(5px 5px 10px rgba(0, 0, 0, 0.7))' />`;
-          },
+          targets: 1,
+          render: (data: string) => `<img src='${data}' style='filter: drop-shadow(5px 5px 10px rgba(0, 0, 0, 0.7))' />`,
         },
         {
-          targets: [2],
+          targets: 2,
           render: (data: string) => {
             const [cuaca, description] = data.split("||");
             return `<strong>${cuaca}</strong><br/>${description}`;
@@ -161,10 +143,7 @@ export class Cuaca implements AfterViewInit {
     if (data.list.length > 0) {
       this.currentWeather = data.list[0];
       this.todayDate = moment(this.currentWeather.dt_txt + " UTC ").local().format("YYYY-MM-DD");
-
-      setTimeout(() => {
-        this.initMap(this.cityData.coord.lat, this.cityData.coord.lon);
-      }, 100);
+      setTimeout(() => this.initMap(this.cityData.coord.lat, this.cityData.coord.lon), 100);
     }
 
     this.populateDataTable(data.list);
@@ -177,13 +156,11 @@ export class Cuaca implements AfterViewInit {
       const weather = element.weather[0];
       const iconUrl = `http://openweathermap.org/img/wn/${weather.icon}@2x.png`;
       const cuacaDesktipsi = `${weather.main}||${weather.description}`;
-
       const tempMin = this.kelvinToCelsius(element.main.temp_min);
       const tempMax = this.kelvinToCelsius(element.main.temp_max);
       const temp = `${tempMin}°C - ${tempMax}°C`;
 
-      const row = [element.dt_txt, iconUrl, cuacaDesktipsi, temp];
-      this.table1.row.add(row);
+      this.table1.row.add([element.dt_txt, iconUrl, cuacaDesktipsi, temp]);
     });
 
     this.table1.draw(false);
@@ -202,7 +179,6 @@ export class Cuaca implements AfterViewInit {
         return;
       }
 
-      // Ensure lat/lon are numbers
       const latitude = Number(lat);
       const longitude = Number(lon);
 
@@ -217,13 +193,11 @@ export class Cuaca implements AfterViewInit {
         maxZoom: 19
       }).addTo(this.map);
 
-      // Create marker with proper positioning
-      const marker = L.marker([latitude, longitude])
+      L.marker([latitude, longitude])
         .addTo(this.map)
         .bindPopup(`<strong>Lokasi ${this.cityData.name}</strong><br/>Lat: ${latitude.toFixed(4)}, Lon: ${longitude.toFixed(4)}`)
         .openPopup();
 
-      // Force map to recalculate size and center on marker
       setTimeout(() => {
         if (this.map) {
           this.map.invalidateSize();

@@ -34,6 +34,21 @@
                                     <th>Kurs</th>
                                 </tr>
                             </thead>
+                            <tbody>
+                                @for (c of currencies; track c.code; let i = $index) {
+                                    <tr>
+                                        <td>{{ i + 1 }}</td>
+                                        <td>
+                                            @if (c.countryCode) {
+                                                <span class="fi fi-{{ c.countryCode }}" style="margin-right: 8px;"></span>
+                                            }
+                                            {{ c.symbol }} <small class="text-muted">({{ c.code }})</small>
+                                        </td>
+                                        <td>{{ c.name }}</td>
+                                        <td>{{ c.rate }}</td>
+                                    </tr>
+                                }
+                            </tbody>
                         </table>
                     </div>
                 </div>
