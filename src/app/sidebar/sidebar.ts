@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, AfterViewInit } from '@angular/core';
 import { RouterModule, Router } from '@angular/router';
 import { CookieService } from 'ngx-cookie-service';
 
@@ -8,7 +8,7 @@ import { CookieService } from 'ngx-cookie-service';
   templateUrl: './sidebar.html',
   styleUrl: './sidebar.css'
 })
-export class Sidebar implements OnInit {
+export class Sidebar implements OnInit, AfterViewInit {
   @Input() moduleName: string = "";
   username:string="";
   _header =document.querySelector('.main-header') as HTMLElement;
@@ -48,5 +48,41 @@ export class Sidebar implements OnInit {
       }
     }
     localStorage.setItem('adminlte-theme', isDark ? 'dark' : 'light');
+  }
+
+  ngAfterViewInit(): void {
+    const w = window as any;
+    const $ = w.$ || (w as any).jQuery;
+    if (!$) return;
+
+    // Initialize AdminLTE Treeview on elements with data-widget="treeview"
+    if ($.fn && typeof $.fn.Treeview === 'function') {
+      try {
+        $.each($('[data-widget="treeview"]'), function(i: number, el: any) {
+          $(el).Treeview('init');
+        });
+      } catch (e) {
+        // ignore
+      }
+    }
+
+    // Initialize OverlayScrollbars for the sidebar if plugin available
+    if ($.fn && typeof $.fn.overlayScrollbars === 'function') {
+      try {
+        $('.main-sidebar .sidebar').each(function(this: any) {
+          const $el = $(this);
+          // avoid double-init
+          if (!$el.data('__overlayScrollbars__')) {
+            $el.overlayScrollbars({
+              className: 'os-theme-light',
+              sizeAutoCapable: true,
+              scrollbars: { autoHide: 'leave', clickScrolling: true }
+            });
+          }
+        });
+      } catch (e) {
+        // ignore
+      }
+    }
   }
 }
